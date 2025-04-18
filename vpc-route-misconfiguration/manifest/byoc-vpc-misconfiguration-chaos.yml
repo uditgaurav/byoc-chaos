@@ -1,0 +1,54 @@
+kind: KubernetesChaosExperiment
+apiVersion: litmuschaos.io/v1alpha1
+metadata:
+  name: byoc-vpc-misconfiguration-chaos
+  namespace: udit-chaos
+spec:
+  tasks:
+    - name: byoc-injector-fy3
+      definition:
+        targets: null
+        chaos:
+          cleanupPolicy: ""
+          experiment: byoc-injector
+          image: docker.io/harness/chaos-ddcr-faults:1.57.0
+          imagePullPolicy: Always
+          defaultHealthCheck: false
+          env:
+            - name: LIB_IMAGE
+              value: docker.io/uditgaurav/byoc-vpc-route-chaos:0.1.0
+            - name: COMMAND
+              value: /bin/bash
+            - name: ARGS
+              value: -c,bash /app/chaos.sh
+            - name: VPC_ID
+              value: vpc-0c79a13b808995ca0
+            - name: TARGET_ROUTE_CIDRS
+              value: 10.1.0.0/16
+            - name: REGION
+              value: us-west-1
+            - name: CHAOS_DURATION
+              value: "60"
+            - name: TARGET_ROUTE_TABLE_IDS
+            - name: TARGET_ROUTE_TABLE_TAG
+            - name: RAMP_TIME
+          components:
+            resources: {}
+            sidecar:
+              - image: docker.io/harness/chaos-log-watcher:1.57.0
+                imagePullPolicy: Always
+                secrets: null
+                envFrom: null
+                env: null
+      probeRef:
+        - probeID: instance-healthcheck
+          mode: Edge
+      values: null
+  experimentId: 51ba668b-6e17-4476-91d2-6155acd8febf
+  experimentRunId: ""
+  steps:
+    - - name: byoc-injector-fy3
+        status: ""
+  cleanupPolicy: delete
+  serviceAccountName: litmus
+variables: null
